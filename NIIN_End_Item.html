@@ -1,15 +1,14 @@
 <html>
 
 <head>
-<style type="text/css">
-.knitr .inline {
+<style type="text/css">.knitr.inline {
   background-color: #f7f7f7;
   border:solid 1px #B0B0B0;
 }
 .error {
 	font-weight: bold;
 	color: #FF0000;
-}
+},
 .warning {
 	font-weight: bold;
 }
@@ -17,19 +16,19 @@
 	font-style: italic;
 }
 .source, .output, .warning, .error, .message {
-	padding: 0 1em;
+	padding: 0em 1em;
   border:solid 1px #F7F7F7;
 }
 .source {
   background-color: #f5f5f5;
 }
-.rimage .left {
+.rimage.left {
   text-align: left;
 }
-.rimage .right {
+.rimage.right {
   text-align: right;
 }
-.rimage .center {
+.rimage.center {
   text-align: center;
 }
 .hl.num {
@@ -61,8 +60,7 @@
 .hl.kwd {
   color: #BC5A65;
   font-weight: bold;
-}
-</style>
+}</style>
 <title>Calculating Shorts wtih R</title>
 </head>
 
@@ -79,127 +77,118 @@
 <div class="chunk" id="unnamed-chunk-1"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(ggplot2)</span>
 <span class="hl kwd">library</span><span class="hl std">(RODBC)</span>
 </pre></div>
-<div class="error"><pre class="knitr r">## Error in library(RODBC): there is no package called 'RODBC'
+<div class="warning"><pre class="knitr r">## Warning: package 'RODBC' was built under R version 3.3.0
 </pre></div>
 </div></div>
+
 <h1>Data Exploration and Cleanup</h1>
 
-<div class="chunk" id="unnamed-chunk-2"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl com"># Connect to Latest EXPRESS Depot DB from ShareDrive Site</span>
-<span class="hl com"># I could not connect using the \\tinker-2k.area52.afnoapps.usaf.mil\dfs1... path</span>
-<span class="hl com"># Change &quot;X&quot; to the drive letter mapped locally</span>
+<div class="chunk" id="unnamed-chunk-2"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl com"># Connect to Latest EXPRESS Depot DB from ShareDrive Site I could not</span>
+<span class="hl com"># connect using the \\tinker-2k.area52.afnoapps.usaf.mil\dfs1... path</span>
+<span class="hl com"># Change 'X' to the drive letter mapped locally</span>
 
 <span class="hl std">accDB</span> <span class="hl kwb">=</span> <span class="hl str">&quot;X:\\EXPRESS ShareDrive\\Current EXPRESS Depot Table\\Current EXPRESS Depot Tables.accdb&quot;</span>
 
-<span class="hl std">mychan</span> <span class="hl kwb">=</span> <span class="hl kwd">odbcDriverConnect</span><span class="hl std">(</span><span class="hl kwd">paste0</span><span class="hl std">(</span><span class="hl str">&quot;Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=&quot;</span><span class="hl std">, accDB))</span>
-</pre></div>
-<div class="error"><pre class="knitr r">## Error in odbcDriverConnect(paste0(&quot;Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=&quot;, : could not find function &quot;odbcDriverConnect&quot;
-</pre></div>
-<div class="source"><pre class="knitr r"><span class="hl com"># Query database</span>
+<span class="hl std">mychan</span> <span class="hl kwb">=</span> <span class="hl kwd">odbcDriverConnect</span><span class="hl std">(</span><span class="hl kwd">paste0</span><span class="hl std">(</span><span class="hl str">&quot;Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=&quot;</span><span class="hl std">,</span>
+    <span class="hl std">accDB))</span>
+
+<span class="hl com"># Query database</span>
 <span class="hl std">shorts_data</span> <span class="hl kwb">=</span> <span class="hl kwd">data.frame</span><span class="hl std">(</span><span class="hl kwd">sqlQuery</span><span class="hl std">(mychan,</span> <span class="hl str">&quot;select niin_id, sran, pos_serviceable, wrm_serviceable, pos_level, base_due_outs, hpmsk_stock from dbo_part_base&quot;</span><span class="hl std">))</span>
-</pre></div>
-<div class="error"><pre class="knitr r">## Error in sqlQuery(mychan, &quot;select niin_id, sran, pos_serviceable, wrm_serviceable, pos_level, base_due_outs, hpmsk_stock from dbo_part_base&quot;): could not find function &quot;sqlQuery&quot;
-</pre></div>
-<div class="source"><pre class="knitr r"><span class="hl com"># View first 5 lines of data</span>
+
+
+<span class="hl com"># View first 5 lines of data</span>
 <span class="hl kwd">head</span><span class="hl std">(shorts_data)</span>
 </pre></div>
-<div class="error"><pre class="knitr r">## Error in head(shorts_data): object 'shorts_data' not found
+<div class="output"><pre class="knitr r">##   niin_id   sran pos_serviceable wrm_serviceable pos_level base_due_outs
+## 1     121 FB2065               2               0        10             0
+## 2     121 FB2805               0               0         0             0
+## 3     121 FB2823               0               0         0             0
+## 4     121 FB4800               0               0         0             0
+## 5     121 FB4819               0               0         0             0
+## 6     121 FB4830               0               0         0             0
+##   hpmsk_stock
+## 1           0
+## 2           0
+## 3           0
+## 4           0
+## 5           0
+## 6           0
 </pre></div>
-<div class="source"><pre class="knitr r"><span class="hl com">#How many rows/cols?</span>
-<span class="hl kwd">print</span> <span class="hl std">(</span><span class="hl kwd">paste0</span><span class="hl std">(</span><span class="hl str">&quot;There are, &quot;</span><span class="hl std">,</span> <span class="hl kwd">dim</span><span class="hl std">(shorts_data)[</span><span class="hl num">1</span><span class="hl std">],</span> <span class="hl str">&quot; rows.&quot;</span><span class="hl std">))</span>
+<div class="source"><pre class="knitr r"><span class="hl com"># How many rows/cols?</span>
+<span class="hl kwd">print</span><span class="hl std">(</span><span class="hl kwd">paste0</span><span class="hl std">(</span><span class="hl str">&quot;There are, &quot;</span><span class="hl std">,</span> <span class="hl kwd">dim</span><span class="hl std">(shorts_data)[</span><span class="hl num">1</span><span class="hl std">],</span> <span class="hl str">&quot; rows.&quot;</span><span class="hl std">))</span>
 </pre></div>
-<div class="error"><pre class="knitr r">## Error in paste0(&quot;There are, &quot;, dim(shorts_data)[1], &quot; rows.&quot;): object 'shorts_data' not found
+<div class="output"><pre class="knitr r">## [1] "There are, 850190 rows."
 </pre></div>
-<div class="source"><pre class="knitr r"><span class="hl kwd">print</span> <span class="hl std">(</span><span class="hl kwd">paste0</span><span class="hl std">(</span><span class="hl str">&quot;There are, &quot;</span><span class="hl std">,</span> <span class="hl kwd">dim</span><span class="hl std">(shorts_data)[</span><span class="hl num">2</span><span class="hl std">],</span> <span class="hl str">&quot; columns&quot;</span><span class="hl std">))</span>
+<div class="source"><pre class="knitr r"><span class="hl kwd">print</span><span class="hl std">(</span><span class="hl kwd">paste0</span><span class="hl std">(</span><span class="hl str">&quot;There are, &quot;</span><span class="hl std">,</span> <span class="hl kwd">dim</span><span class="hl std">(shorts_data)[</span><span class="hl num">2</span><span class="hl std">],</span> <span class="hl str">&quot; columns&quot;</span><span class="hl std">))</span>
 </pre></div>
-<div class="error"><pre class="knitr r">## Error in paste0(&quot;There are, &quot;, dim(shorts_data)[2], &quot; columns&quot;): object 'shorts_data' not found
+<div class="output"><pre class="knitr r">## [1] "There are, 7 columns"
 </pre></div>
-<div class="source"><pre class="knitr r"><span class="hl com">#Are there any NA's to worry about?</span>
+<div class="source"><pre class="knitr r"><span class="hl com"># Are there any NA's to worry about?</span>
 <span class="hl std">niin_to_ei_df</span> <span class="hl kwb">=</span> <span class="hl kwd">na.omit</span><span class="hl std">(shorts_data)</span>
+<span class="hl kwd">dim</span><span class="hl std">(shorts_data)</span>
 </pre></div>
-<div class="error"><pre class="knitr r">## Error in na.omit(shorts_data): object 'shorts_data' not found
-</pre></div>
-<div class="source"><pre class="knitr r"><span class="hl kwd">dim</span><span class="hl std">(shorts_data)</span>
-</pre></div>
-<div class="error"><pre class="knitr r">## Error in eval(expr, envir, enclos): object 'shorts_data' not found
+<div class="output"><pre class="knitr r">## [1] 850190      7
 </pre></div>
 </div></div>
 
+
 <p>Let's take a peak at the first 50 data points of <i>pos_serviceable</i> and <i>pos_level</i> with a quick plot.</p>
 
-<div class="chunk" id="unnamed-chunk-3"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">plot</span><span class="hl std">(</span><span class="hl num">5</span><span class="hl std">,</span><span class="hl num">5</span><span class="hl std">,</span> <span class="hl kwc">type</span> <span class="hl std">=</span><span class="hl str">&quot;n&quot;</span><span class="hl std">,</span> <span class="hl kwc">axes</span> <span class="hl std">=</span> <span class="hl num">FALSE</span><span class="hl std">,</span> <span class="hl kwc">ann</span> <span class="hl std">=</span> <span class="hl num">FALSE</span><span class="hl std">,</span> <span class="hl kwc">xlim</span><span class="hl std">=</span><span class="hl kwd">c</span><span class="hl std">(</span><span class="hl num">0</span><span class="hl std">,</span><span class="hl num">50</span><span class="hl std">),</span> <span class="hl kwc">ylim</span><span class="hl std">=</span><span class="hl kwd">c</span><span class="hl std">(</span><span class="hl num">0</span><span class="hl std">,</span><span class="hl num">10</span><span class="hl std">))</span>
+<div class="chunk" id="unnamed-chunk-3"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">plot</span><span class="hl std">(</span><span class="hl num">5</span><span class="hl std">,</span> <span class="hl num">5</span><span class="hl std">,</span> <span class="hl kwc">type</span> <span class="hl std">=</span> <span class="hl str">&quot;n&quot;</span><span class="hl std">,</span> <span class="hl kwc">axes</span> <span class="hl std">=</span> <span class="hl num">FALSE</span><span class="hl std">,</span> <span class="hl kwc">ann</span> <span class="hl std">=</span> <span class="hl num">FALSE</span><span class="hl std">,</span> <span class="hl kwc">xlim</span> <span class="hl std">=</span> <span class="hl kwd">c</span><span class="hl std">(</span><span class="hl num">0</span><span class="hl std">,</span> <span class="hl num">50</span><span class="hl std">),</span> <span class="hl kwc">ylim</span> <span class="hl std">=</span> <span class="hl kwd">c</span><span class="hl std">(</span><span class="hl num">0</span><span class="hl std">,</span>
+    <span class="hl num">10</span><span class="hl std">))</span>
 <span class="hl kwd">axis</span><span class="hl std">(</span><span class="hl num">1</span><span class="hl std">)</span>
 <span class="hl kwd">axis</span><span class="hl std">(</span><span class="hl num">2</span><span class="hl std">,</span> <span class="hl kwc">las</span> <span class="hl std">=</span> <span class="hl num">2</span><span class="hl std">)</span>
 <span class="hl kwd">mtext</span><span class="hl std">(</span><span class="hl str">&quot;NIIN Index&quot;</span><span class="hl std">,</span> <span class="hl kwc">side</span> <span class="hl std">=</span> <span class="hl num">1</span><span class="hl std">,</span> <span class="hl kwc">line</span> <span class="hl std">=</span> <span class="hl num">3</span><span class="hl std">)</span>
 <span class="hl kwd">mtext</span><span class="hl std">(</span><span class="hl str">&quot;Quantity&quot;</span><span class="hl std">,</span> <span class="hl kwc">side</span> <span class="hl std">=</span> <span class="hl num">2</span><span class="hl std">,</span> <span class="hl kwc">line</span> <span class="hl std">=</span> <span class="hl num">3</span><span class="hl std">)</span>
 <span class="hl kwd">title</span><span class="hl std">(</span><span class="hl str">&quot;POS Serviceable and POS Level&quot;</span><span class="hl std">)</span>
+
+
+<span class="hl std">x</span> <span class="hl kwb">=</span> <span class="hl std">shorts_data[,</span> <span class="hl num">3</span><span class="hl std">]</span>
+<span class="hl std">y</span> <span class="hl kwb">=</span> <span class="hl std">shorts_data[,</span> <span class="hl num">5</span><span class="hl std">]</span>
+<span class="hl kwd">points</span><span class="hl std">(x,</span> <span class="hl kwc">pch</span> <span class="hl std">=</span> <span class="hl num">21</span><span class="hl std">,</span> <span class="hl kwc">col</span> <span class="hl std">=</span> <span class="hl str">&quot;white&quot;</span><span class="hl std">,</span> <span class="hl kwc">bg</span> <span class="hl std">=</span> <span class="hl str">&quot;black&quot;</span><span class="hl std">)</span>
+<span class="hl kwd">points</span><span class="hl std">(y,</span> <span class="hl kwc">pch</span> <span class="hl std">=</span> <span class="hl num">21</span><span class="hl std">,</span> <span class="hl kwc">col</span> <span class="hl std">=</span> <span class="hl str">&quot;white&quot;</span><span class="hl std">,</span> <span class="hl kwc">bg</span> <span class="hl std">=</span> <span class="hl str">&quot;green&quot;</span><span class="hl std">)</span>
 </pre></div>
-</div><div class="rimage default"><img src="figure/unnamed-chunk-3-1.png" title="plot of chunk unnamed-chunk-3" alt="plot of chunk unnamed-chunk-3" class="plot" /></div><div class="rcode">
-<div class="source"><pre class="knitr r"><span class="hl std">x</span> <span class="hl kwb">=</span> <span class="hl std">shorts_data[,</span><span class="hl num">3</span><span class="hl std">]</span>
-</pre></div>
-<div class="error"><pre class="knitr r">## Error in eval(expr, envir, enclos): object 'shorts_data' not found
-</pre></div>
-<div class="source"><pre class="knitr r"><span class="hl std">y</span> <span class="hl kwb">=</span> <span class="hl std">shorts_data[,</span><span class="hl num">5</span><span class="hl std">]</span>
-</pre></div>
-<div class="error"><pre class="knitr r">## Error in eval(expr, envir, enclos): object 'shorts_data' not found
-</pre></div>
-<div class="source"><pre class="knitr r"><span class="hl kwd">points</span><span class="hl std">(x,</span> <span class="hl kwc">pch</span><span class="hl std">=</span><span class="hl num">21</span><span class="hl std">,</span> <span class="hl kwc">col</span><span class="hl std">=</span><span class="hl str">&quot;white&quot;</span><span class="hl std">,</span> <span class="hl kwc">bg</span><span class="hl std">=</span><span class="hl str">&quot;black&quot;</span><span class="hl std">)</span>
-</pre></div>
-<div class="error"><pre class="knitr r">## Error in points(x, pch = 21, col = &quot;white&quot;, bg = &quot;black&quot;): object 'x' not found
-</pre></div>
-<div class="source"><pre class="knitr r"><span class="hl kwd">points</span><span class="hl std">(y,</span> <span class="hl kwc">pch</span><span class="hl std">=</span><span class="hl num">21</span><span class="hl std">,</span> <span class="hl kwc">col</span> <span class="hl std">=</span> <span class="hl str">&quot;white&quot;</span><span class="hl std">,</span> <span class="hl kwc">bg</span> <span class="hl std">=</span> <span class="hl str">&quot;green&quot;</span><span class="hl std">)</span>
-</pre></div>
-<div class="error"><pre class="knitr r">## Error in points(y, pch = 21, col = &quot;white&quot;, bg = &quot;green&quot;): object 'y' not found
-</pre></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-3.png" title="plot of chunk unnamed-chunk-3" alt="plot of chunk unnamed-chunk-3" class="plot" /></div><div class="rcode">
 <div class="source"><pre class="knitr r"><span class="hl std">points</span>
 </pre></div>
 <div class="output"><pre class="knitr r">## function (x, ...) 
-## UseMethod(&quot;points&quot;)
-## &lt;bytecode: 0x7fd90dd30908&gt;
-## &lt;environment: namespace:graphics&gt;
+## UseMethod("points")
+## <bytecode: 0x07dc6e38>
+## <environment: namespace:graphics>
 </pre></div>
 </div></div>
+
 <p> Two things to notice about this plot: First, there seems to be a lot of <i>0's</i> in the data. Second, Do you think some of the Green dots are overlapping the Black dots at those <i>0</i> points. <p>
 <p>It turns out that if a <i>pos_level</i> is <b>0</b> then it can be pulled out of the data set. We only care about levels that are greater than 0. </p>
 
 <p>Removing serviceable_level = 0 from data frame. 
 
 <div class="chunk" id="unnamed-chunk-4"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl std">shorts_data_pos</span> <span class="hl kwb">=</span> <span class="hl kwd">subset</span><span class="hl std">(shorts_data, shorts_data</span><span class="hl opt">$</span><span class="hl std">pos_level</span> <span class="hl opt">&gt;</span> <span class="hl num">0</span><span class="hl std">)</span>
+<span class="hl kwd">dim</span><span class="hl std">(shorts_data_pos)</span>
 </pre></div>
-<div class="error"><pre class="knitr r">## Error in subset(shorts_data, shorts_data$pos_level &gt; 0): object 'shorts_data' not found
-</pre></div>
-<div class="source"><pre class="knitr r"><span class="hl kwd">dim</span><span class="hl std">(shorts_data_pos)</span>
-</pre></div>
-<div class="error"><pre class="knitr r">## Error in eval(expr, envir, enclos): object 'shorts_data_pos' not found
+<div class="output"><pre class="knitr r">## [1] 60190     7
 </pre></div>
 </div></div>
 
+
 <p>Plotting the new points without 0's. </p>
 
-<div class="chunk" id="unnamed-chunk-5"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">plot</span><span class="hl std">(</span><span class="hl num">5</span><span class="hl std">,</span><span class="hl num">5</span><span class="hl std">,</span> <span class="hl kwc">type</span> <span class="hl std">=</span><span class="hl str">&quot;n&quot;</span><span class="hl std">,</span> <span class="hl kwc">axes</span> <span class="hl std">=</span> <span class="hl num">FALSE</span><span class="hl std">,</span> <span class="hl kwc">ann</span> <span class="hl std">=</span> <span class="hl num">FALSE</span><span class="hl std">,</span> <span class="hl kwc">xlim</span><span class="hl std">=</span><span class="hl kwd">c</span><span class="hl std">(</span><span class="hl num">0</span><span class="hl std">,</span><span class="hl num">50</span><span class="hl std">),</span> <span class="hl kwc">ylim</span><span class="hl std">=</span><span class="hl kwd">c</span><span class="hl std">(</span><span class="hl num">0</span><span class="hl std">,</span><span class="hl num">10</span><span class="hl std">))</span>
+<div class="chunk" id="unnamed-chunk-5"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">plot</span><span class="hl std">(</span><span class="hl num">5</span><span class="hl std">,</span> <span class="hl num">5</span><span class="hl std">,</span> <span class="hl kwc">type</span> <span class="hl std">=</span> <span class="hl str">&quot;n&quot;</span><span class="hl std">,</span> <span class="hl kwc">axes</span> <span class="hl std">=</span> <span class="hl num">FALSE</span><span class="hl std">,</span> <span class="hl kwc">ann</span> <span class="hl std">=</span> <span class="hl num">FALSE</span><span class="hl std">,</span> <span class="hl kwc">xlim</span> <span class="hl std">=</span> <span class="hl kwd">c</span><span class="hl std">(</span><span class="hl num">0</span><span class="hl std">,</span> <span class="hl num">50</span><span class="hl std">),</span> <span class="hl kwc">ylim</span> <span class="hl std">=</span> <span class="hl kwd">c</span><span class="hl std">(</span><span class="hl num">0</span><span class="hl std">,</span>
+    <span class="hl num">10</span><span class="hl std">))</span>
 <span class="hl kwd">axis</span><span class="hl std">(</span><span class="hl num">1</span><span class="hl std">)</span>
 <span class="hl kwd">axis</span><span class="hl std">(</span><span class="hl num">2</span><span class="hl std">,</span> <span class="hl kwc">las</span> <span class="hl std">=</span> <span class="hl num">2</span><span class="hl std">)</span>
 <span class="hl kwd">mtext</span><span class="hl std">(</span><span class="hl str">&quot;NIIN Index&quot;</span><span class="hl std">,</span> <span class="hl kwc">side</span> <span class="hl std">=</span> <span class="hl num">1</span><span class="hl std">,</span> <span class="hl kwc">line</span> <span class="hl std">=</span> <span class="hl num">3</span><span class="hl std">)</span>
 <span class="hl kwd">mtext</span><span class="hl std">(</span><span class="hl str">&quot;Quantity&quot;</span><span class="hl std">,</span> <span class="hl kwc">side</span> <span class="hl std">=</span> <span class="hl num">2</span><span class="hl std">,</span> <span class="hl kwc">line</span> <span class="hl std">=</span> <span class="hl num">3</span><span class="hl std">)</span>
 <span class="hl kwd">title</span><span class="hl std">(</span><span class="hl str">&quot;POS Serviceable and POS Level &gt; 0&quot;</span><span class="hl std">)</span>
+
+
+<span class="hl std">x</span> <span class="hl kwb">=</span> <span class="hl std">shorts_data_pos[,</span> <span class="hl num">3</span><span class="hl std">]</span>
+<span class="hl std">y</span> <span class="hl kwb">=</span> <span class="hl std">shorts_data_pos[,</span> <span class="hl num">5</span><span class="hl std">]</span>
+<span class="hl kwd">points</span><span class="hl std">(x,</span> <span class="hl kwc">pch</span> <span class="hl std">=</span> <span class="hl num">21</span><span class="hl std">,</span> <span class="hl kwc">col</span> <span class="hl std">=</span> <span class="hl str">&quot;white&quot;</span><span class="hl std">,</span> <span class="hl kwc">bg</span> <span class="hl std">=</span> <span class="hl str">&quot;black&quot;</span><span class="hl std">)</span>
+<span class="hl kwd">points</span><span class="hl std">(y,</span> <span class="hl kwc">pch</span> <span class="hl std">=</span> <span class="hl num">21</span><span class="hl std">,</span> <span class="hl kwc">col</span> <span class="hl std">=</span> <span class="hl str">&quot;white&quot;</span><span class="hl std">,</span> <span class="hl kwc">bg</span> <span class="hl std">=</span> <span class="hl str">&quot;green&quot;</span><span class="hl std">)</span>
 </pre></div>
-</div><div class="rimage default"><img src="figure/unnamed-chunk-5-1.png" title="plot of chunk unnamed-chunk-5" alt="plot of chunk unnamed-chunk-5" class="plot" /></div><div class="rcode">
-<div class="source"><pre class="knitr r"><span class="hl std">x</span> <span class="hl kwb">=</span> <span class="hl std">shorts_data_pos[,</span><span class="hl num">3</span><span class="hl std">]</span>
-</pre></div>
-<div class="error"><pre class="knitr r">## Error in eval(expr, envir, enclos): object 'shorts_data_pos' not found
-</pre></div>
-<div class="source"><pre class="knitr r"><span class="hl std">y</span> <span class="hl kwb">=</span> <span class="hl std">shorts_data_pos[,</span><span class="hl num">5</span><span class="hl std">]</span>
-</pre></div>
-<div class="error"><pre class="knitr r">## Error in eval(expr, envir, enclos): object 'shorts_data_pos' not found
-</pre></div>
-<div class="source"><pre class="knitr r"><span class="hl kwd">points</span><span class="hl std">(x,</span> <span class="hl kwc">pch</span><span class="hl std">=</span><span class="hl num">21</span><span class="hl std">,</span> <span class="hl kwc">col</span><span class="hl std">=</span><span class="hl str">&quot;white&quot;</span><span class="hl std">,</span> <span class="hl kwc">bg</span><span class="hl std">=</span><span class="hl str">&quot;black&quot;</span><span class="hl std">)</span>
-</pre></div>
-<div class="error"><pre class="knitr r">## Error in points(x, pch = 21, col = &quot;white&quot;, bg = &quot;black&quot;): object 'x' not found
-</pre></div>
-<div class="source"><pre class="knitr r"><span class="hl kwd">points</span><span class="hl std">(y,</span> <span class="hl kwc">pch</span><span class="hl std">=</span><span class="hl num">21</span><span class="hl std">,</span> <span class="hl kwc">col</span> <span class="hl std">=</span> <span class="hl str">&quot;white&quot;</span><span class="hl std">,</span> <span class="hl kwc">bg</span> <span class="hl std">=</span> <span class="hl str">&quot;green&quot;</span><span class="hl std">)</span>
-</pre></div>
-<div class="error"><pre class="knitr r">## Error in points(y, pch = 21, col = &quot;white&quot;, bg = &quot;green&quot;): object 'y' not found
-</pre></div>
-</div></div>
+</div><div class="rimage default"><img src="figure/unnamed-chunk-5.png" title="plot of chunk unnamed-chunk-5" alt="plot of chunk unnamed-chunk-5" class="plot" /></div></div>
+
 
 <h1>Shorts</h1>
 <h2>Total Shorts / Total Level</h2>
@@ -208,93 +197,64 @@
 
 <div class="chunk" id="unnamed-chunk-6"><div class="rcode"><div class="source"><pre class="knitr r"><span class="hl kwd">library</span><span class="hl std">(data.table)</span>
 <span class="hl kwd">library</span><span class="hl std">(plyr)</span>
-
-<span class="hl com"># Convert dataframe to data table</span>
+</pre></div>
+<div class="warning"><pre class="knitr r">## Warning: package 'plyr' was built under R version 3.2.2
+</pre></div>
+<div class="source"><pre class="knitr r"><span class="hl com"># Convert dataframe to data table</span>
 <span class="hl std">serviceable.dt</span> <span class="hl kwb">=</span> <span class="hl kwd">as.data.table</span><span class="hl std">(shorts_data_pos)</span>
-</pre></div>
-<div class="error"><pre class="knitr r">## Error in as.data.table(shorts_data_pos): object 'shorts_data_pos' not found
-</pre></div>
-<div class="source"><pre class="knitr r"><span class="hl std">agg_serv</span> <span class="hl kwb">=</span> <span class="hl std">serviceable.dt[,</span> <span class="hl kwd">sum</span><span class="hl std">(serviceable.dt</span><span class="hl opt">$</span><span class="hl std">pos_serviceable)]</span>
-</pre></div>
-<div class="error"><pre class="knitr r">## Error in eval(expr, envir, enclos): object 'serviceable.dt' not found
-</pre></div>
-<div class="source"><pre class="knitr r"><span class="hl std">agg_serv_lev</span> <span class="hl kwb">=</span> <span class="hl std">serviceable.dt[,</span> <span class="hl kwd">sum</span><span class="hl std">(serviceable.dt</span><span class="hl opt">$</span><span class="hl std">pos_level)]</span>
-</pre></div>
-<div class="error"><pre class="knitr r">## Error in eval(expr, envir, enclos): object 'serviceable.dt' not found
-</pre></div>
-<div class="source"><pre class="knitr r"><span class="hl com"># what is the perecent serviceable / level for pos?</span>
+
+<span class="hl std">agg_serv</span> <span class="hl kwb">=</span> <span class="hl std">serviceable.dt[,</span> <span class="hl kwd">sum</span><span class="hl std">(serviceable.dt</span><span class="hl opt">$</span><span class="hl std">pos_serviceable)]</span>
+<span class="hl std">agg_serv_lev</span> <span class="hl kwb">=</span> <span class="hl std">serviceable.dt[,</span> <span class="hl kwd">sum</span><span class="hl std">(serviceable.dt</span><span class="hl opt">$</span><span class="hl std">pos_level)]</span>
+
+
+<span class="hl com"># what is the perecent serviceable / level for pos?</span>
 <span class="hl std">RO_agg</span> <span class="hl kwb">=</span> <span class="hl std">agg_serv</span><span class="hl opt">/</span><span class="hl std">agg_serv_lev</span>
+<span class="hl std">RO_agg</span>
 </pre></div>
-<div class="error"><pre class="knitr r">## Error in eval(expr, envir, enclos): object 'agg_serv' not found
-</pre></div>
-<div class="source"><pre class="knitr r"><span class="hl std">RO_agg</span>
-</pre></div>
-<div class="error"><pre class="knitr r">## Error in eval(expr, envir, enclos): object 'RO_agg' not found
+<div class="output"><pre class="knitr r">## [1] 0.7422
 </pre></div>
 <div class="source"><pre class="knitr r"><span class="hl std">count_sran</span> <span class="hl kwb">=</span> <span class="hl kwd">count</span><span class="hl std">(serviceable.dt,</span> <span class="hl kwd">c</span><span class="hl std">(</span><span class="hl str">&quot;sran&quot;</span><span class="hl std">))</span>
+<span class="hl kwd">print</span><span class="hl std">(</span><span class="hl kwd">paste0</span><span class="hl std">(</span><span class="hl str">&quot;The number of sran's: &quot;</span><span class="hl std">,</span> <span class="hl kwd">dim</span><span class="hl std">(count_sran)[</span><span class="hl num">1</span><span class="hl std">]))</span>
 </pre></div>
-<div class="error"><pre class="knitr r">## Error in count(serviceable.dt, c(&quot;sran&quot;)): object 'serviceable.dt' not found
-</pre></div>
-<div class="source"><pre class="knitr r"><span class="hl kwd">print</span> <span class="hl std">(</span><span class="hl kwd">paste0</span><span class="hl std">(</span><span class="hl str">&quot;The number of sran's: &quot;</span><span class="hl std">,</span> <span class="hl kwd">dim</span><span class="hl std">(count_sran)[</span><span class="hl num">1</span><span class="hl std">]))</span>
-</pre></div>
-<div class="error"><pre class="knitr r">## Error in paste0(&quot;The number of sran's: &quot;, dim(count_sran)[1]): object 'count_sran' not found
+<div class="output"><pre class="knitr r">## [1] "The number of sran's: 194"
 </pre></div>
 <div class="source"><pre class="knitr r"><span class="hl com"># serviceable by sran</span>
-<span class="hl std">serv_by_sran</span> <span class="hl kwb">=</span> <span class="hl kwd">aggregate</span><span class="hl std">(serviceable.dt</span><span class="hl opt">$</span><span class="hl std">pos_serviceable</span> <span class="hl opt">~</span> <span class="hl std">serviceable.dt</span><span class="hl opt">$</span><span class="hl std">sran, sum,</span> <span class="hl kwc">data</span> <span class="hl std">= serviceable.dt)</span>
-</pre></div>
-<div class="error"><pre class="knitr r">## Error in eval(m$data, parent.frame()): object 'serviceable.dt' not found
-</pre></div>
-<div class="source"><pre class="knitr r"><span class="hl std">level_by_sran</span> <span class="hl kwb">=</span> <span class="hl kwd">aggregate</span><span class="hl std">(serviceable.dt</span><span class="hl opt">$</span><span class="hl std">pos_level</span> <span class="hl opt">~</span> <span class="hl std">serviceable.dt</span><span class="hl opt">$</span><span class="hl std">sran,</span> <span class="hl kwc">data</span> <span class="hl std">= serviceable.dt, sum)</span>
-</pre></div>
-<div class="error"><pre class="knitr r">## Error in eval(m$data, parent.frame()): object 'serviceable.dt' not found
-</pre></div>
-<div class="source"><pre class="knitr r"><span class="hl std">ro_percent_sran</span> <span class="hl kwb">=</span> <span class="hl kwd">as.data.table</span><span class="hl std">(count_sran</span><span class="hl opt">$</span><span class="hl std">sran)</span>
-</pre></div>
-<div class="error"><pre class="knitr r">## Error in as.data.table(count_sran$sran): object 'count_sran' not found
-</pre></div>
-<div class="source"><pre class="knitr r"><span class="hl std">ro_percent_sran</span><span class="hl opt">$</span><span class="hl std">ro_percent</span> <span class="hl kwb">=</span> <span class="hl std">serv_by_sran[</span><span class="hl num">2</span><span class="hl std">]</span><span class="hl opt">/</span><span class="hl std">level_by_sran[</span><span class="hl num">2</span><span class="hl std">]</span>
-</pre></div>
-<div class="error"><pre class="knitr r">## Error in eval(expr, envir, enclos): object 'serv_by_sran' not found
-</pre></div>
-<div class="source"><pre class="knitr r"><span class="hl kwd">colnames</span><span class="hl std">(ro_percent_sran)[</span><span class="hl num">1</span><span class="hl std">]</span><span class="hl kwb">=</span><span class="hl str">&quot;SRAN&quot;</span>
-</pre></div>
-<div class="error"><pre class="knitr r">## Error in colnames(ro_percent_sran)[1] = &quot;SRAN&quot;: object 'ro_percent_sran' not found
-</pre></div>
-<div class="source"><pre class="knitr r"><span class="hl com">#How many SRANs have shorts?</span>
+<span class="hl std">serv_by_sran</span> <span class="hl kwb">=</span> <span class="hl kwd">aggregate</span><span class="hl std">(serviceable.dt</span><span class="hl opt">$</span><span class="hl std">pos_serviceable</span> <span class="hl opt">~</span> <span class="hl std">serviceable.dt</span><span class="hl opt">$</span><span class="hl std">sran,</span>
+    <span class="hl std">sum,</span> <span class="hl kwc">data</span> <span class="hl std">= serviceable.dt)</span>
+<span class="hl std">level_by_sran</span> <span class="hl kwb">=</span> <span class="hl kwd">aggregate</span><span class="hl std">(serviceable.dt</span><span class="hl opt">$</span><span class="hl std">pos_level</span> <span class="hl opt">~</span> <span class="hl std">serviceable.dt</span><span class="hl opt">$</span><span class="hl std">sran,</span> <span class="hl kwc">data</span> <span class="hl std">= serviceable.dt,</span>
+    <span class="hl std">sum)</span>
+
+<span class="hl std">ro_percent_sran</span> <span class="hl kwb">=</span> <span class="hl kwd">as.data.table</span><span class="hl std">(count_sran</span><span class="hl opt">$</span><span class="hl std">sran)</span>
+<span class="hl std">ro_percent_sran</span><span class="hl opt">$</span><span class="hl std">ro_percent</span> <span class="hl kwb">=</span> <span class="hl std">serv_by_sran[</span><span class="hl num">2</span><span class="hl std">]</span><span class="hl opt">/</span><span class="hl std">level_by_sran[</span><span class="hl num">2</span><span class="hl std">]</span>
+<span class="hl kwd">colnames</span><span class="hl std">(ro_percent_sran)[</span><span class="hl num">1</span><span class="hl std">]</span> <span class="hl kwb">=</span> <span class="hl str">&quot;SRAN&quot;</span>
+
+<span class="hl com"># How many SRANs have shorts?</span>
 <span class="hl std">srans_w_shorts</span> <span class="hl kwb">=</span> <span class="hl kwd">subset</span><span class="hl std">(ro_percent_sran, ro_percent_sran</span><span class="hl opt">$</span><span class="hl std">ro_percent</span> <span class="hl opt">&lt;</span> <span class="hl num">1</span><span class="hl std">)</span>
+<span class="hl std">srans_w_excess</span> <span class="hl kwb">=</span> <span class="hl kwd">subset</span><span class="hl std">(ro_percent_sran, ro_percent_sran</span><span class="hl opt">$</span><span class="hl std">ro_percent</span> <span class="hl opt">&gt;</span> <span class="hl num">1</span><span class="hl std">)</span>
+
+<span class="hl kwd">print</span><span class="hl std">(</span><span class="hl kwd">paste0</span><span class="hl std">(</span><span class="hl str">&quot;Number of SRANS that are short: &quot;</span><span class="hl std">,</span> <span class="hl kwd">dim</span><span class="hl std">(srans_w_shorts)[</span><span class="hl num">1</span><span class="hl std">]))</span>
 </pre></div>
-<div class="error"><pre class="knitr r">## Error in subset(ro_percent_sran, ro_percent_sran$ro_percent &lt; 1): object 'ro_percent_sran' not found
+<div class="output"><pre class="knitr r">## [1] "Number of SRANS that are short: 167"
 </pre></div>
-<div class="source"><pre class="knitr r"><span class="hl std">srans_w_excess</span> <span class="hl kwb">=</span> <span class="hl kwd">subset</span><span class="hl std">(ro_percent_sran, ro_percent_sran</span><span class="hl opt">$</span><span class="hl std">ro_percent</span> <span class="hl opt">&gt;</span> <span class="hl num">1</span><span class="hl std">)</span>
+<div class="source"><pre class="knitr r"><span class="hl kwd">print</span><span class="hl std">(</span><span class="hl kwd">paste0</span><span class="hl std">(</span><span class="hl str">&quot;Number of SRANS that are misaligned: &quot;</span><span class="hl std">,</span> <span class="hl kwd">dim</span><span class="hl std">(srans_w_excess)[</span><span class="hl num">1</span><span class="hl std">]))</span>
 </pre></div>
-<div class="error"><pre class="knitr r">## Error in subset(ro_percent_sran, ro_percent_sran$ro_percent &gt; 1): object 'ro_percent_sran' not found
-</pre></div>
-<div class="source"><pre class="knitr r"><span class="hl kwd">print</span> <span class="hl std">(</span><span class="hl kwd">paste0</span><span class="hl std">(</span><span class="hl str">&quot;Number of SRANS that are short: &quot;</span><span class="hl std">,</span> <span class="hl kwd">dim</span><span class="hl std">(srans_w_shorts)[</span><span class="hl num">1</span><span class="hl std">]))</span>
-</pre></div>
-<div class="error"><pre class="knitr r">## Error in paste0(&quot;Number of SRANS that are short: &quot;, dim(srans_w_shorts)[1]): object 'srans_w_shorts' not found
-</pre></div>
-<div class="source"><pre class="knitr r"><span class="hl kwd">print</span> <span class="hl std">(</span><span class="hl kwd">paste0</span><span class="hl std">(</span><span class="hl str">&quot;Number of SRANS that are misaligned: &quot;</span><span class="hl std">,</span> <span class="hl kwd">dim</span><span class="hl std">(srans_w_excess)[</span><span class="hl num">1</span><span class="hl std">]))</span>
-</pre></div>
-<div class="error"><pre class="knitr r">## Error in paste0(&quot;Number of SRANS that are misaligned: &quot;, dim(srans_w_excess)[1]): object 'srans_w_excess' not found
+<div class="output"><pre class="knitr r">## [1] "Number of SRANS that are misaligned: 20"
 </pre></div>
 <div class="source"><pre class="knitr r"><span class="hl com"># Let's narrow the focus areas down to srans with under 60% RO only</span>
-<span class="hl std">srans_under60</span> <span class="hl kwb">=</span> <span class="hl kwd">subset</span><span class="hl std">(ro_percent_sran, ro_percent_sran</span><span class="hl opt">$</span><span class="hl std">ro_percent</span> <span class="hl opt">&lt;</span> <span class="hl num">.6</span><span class="hl std">)</span>
+<span class="hl std">srans_under60</span> <span class="hl kwb">=</span> <span class="hl kwd">subset</span><span class="hl std">(ro_percent_sran, ro_percent_sran</span><span class="hl opt">$</span><span class="hl std">ro_percent</span> <span class="hl opt">&lt;</span> <span class="hl num">0.6</span><span class="hl std">)</span>
+
+<span class="hl kwd">print</span><span class="hl std">(</span><span class="hl kwd">paste0</span><span class="hl std">(</span><span class="hl str">&quot;Number of SRANS under 60% RO Fill is: &quot;</span><span class="hl std">,</span> <span class="hl kwd">dim</span><span class="hl std">(srans_under60)[</span><span class="hl num">1</span><span class="hl std">]))</span>
 </pre></div>
-<div class="error"><pre class="knitr r">## Error in subset(ro_percent_sran, ro_percent_sran$ro_percent &lt; 0.6): object 'ro_percent_sran' not found
+<div class="output"><pre class="knitr r">## [1] "Number of SRANS under 60% RO Fill is: 42"
 </pre></div>
-<div class="source"><pre class="knitr r"><span class="hl kwd">print</span> <span class="hl std">(</span><span class="hl kwd">paste0</span><span class="hl std">(</span><span class="hl str">&quot;Number of SRANS under 60% RO Fill is: &quot;</span><span class="hl std">,</span> <span class="hl kwd">dim</span><span class="hl std">(srans_under60)[</span><span class="hl num">1</span><span class="hl std">]))</span>
+<div class="source"><pre class="knitr r"><span class="hl std">asset_avail_overall</span> <span class="hl kwb">=</span> <span class="hl num">1</span> <span class="hl opt">-</span> <span class="hl kwd">dim</span><span class="hl std">(srans_under60)[</span><span class="hl num">1</span><span class="hl std">]</span><span class="hl opt">/</span><span class="hl kwd">dim</span><span class="hl std">(ro_percent_sran)[</span><span class="hl num">1</span><span class="hl std">]</span>
+
+<span class="hl kwd">print</span><span class="hl std">(</span><span class="hl kwd">paste0</span><span class="hl std">(</span><span class="hl str">&quot;Overall AAv = &quot;</span><span class="hl std">, asset_avail_overall))</span>
 </pre></div>
-<div class="error"><pre class="knitr r">## Error in paste0(&quot;Number of SRANS under 60% RO Fill is: &quot;, dim(srans_under60)[1]): object 'srans_under60' not found
-</pre></div>
-<div class="source"><pre class="knitr r"><span class="hl std">asset_avail_overall</span> <span class="hl kwb">=</span> <span class="hl num">1</span><span class="hl opt">-</span> <span class="hl kwd">dim</span><span class="hl std">(srans_under60)[</span><span class="hl num">1</span><span class="hl std">]</span><span class="hl opt">/</span><span class="hl kwd">dim</span><span class="hl std">(ro_percent_sran)[</span><span class="hl num">1</span><span class="hl std">]</span>
-</pre></div>
-<div class="error"><pre class="knitr r">## Error in eval(expr, envir, enclos): object 'srans_under60' not found
-</pre></div>
-<div class="source"><pre class="knitr r"><span class="hl kwd">print</span> <span class="hl std">(</span><span class="hl kwd">paste0</span><span class="hl std">(</span><span class="hl str">&quot;Overall AAv = &quot;</span><span class="hl std">, asset_avail_overall))</span>
-</pre></div>
-<div class="error"><pre class="knitr r">## Error in paste0(&quot;Overall AAv = &quot;, asset_avail_overall): object 'asset_avail_overall' not found
+<div class="output"><pre class="knitr r">## [1] "Overall AAv = 0.783505154639175"
 </pre></div>
 </div></div>
+
 
 </body>
 </html>
